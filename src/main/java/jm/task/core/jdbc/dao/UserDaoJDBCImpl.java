@@ -11,83 +11,67 @@ import java.util.List;
 
 public class UserDaoJDBCImpl implements UserDao {
 
-
-             Connection connection = Util.OpenConnection();
-
-
-
     public UserDaoJDBCImpl() {
     }
 
     public void createUsersTable() {
-        // Statement - интерфейс для доступа к БД
-        try (
-                // Connection connection = Util.OpenConnection();
-             Statement statement = connection.createStatement()) { // statement для запросов
-            //executeUpdate, если в строке есть запрос
-            statement.executeUpdate("CREATE TABLE IF NOT EXISTS user (" +    // плюс таблица если ее еще нет
+        try ( Connection connection = Util.OpenConnection();
+              Statement statement = connection.createStatement()) {
+
+            statement.executeUpdate("CREATE TABLE IF NOT EXISTS user (" +
                     "id BIGINT primary key AUTO_INCREMENT, " +
                     "name VARCHAR(255), " +
                     "lastName VARCHAR(255), " +
                     "age TINYINT)");
 
-            connection.setAutoCommit(false); //  статус фиксации в false и завершается методом commit и там же сохраняются изменения
+            connection.setAutoCommit(false);
             connection.commit(); //
-            System.out.println("Table was created!" + "\n");
-            //коннекшон закрывается в ресурсах
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
     public void dropUsersTable() {
-        try (
-               // Connection connection = Util.OpenConnection();
-            Statement statement = connection.createStatement()) {
-            //executeUpdate, если в строке есть запрос
-            statement.executeUpdate("DROP TABLE IF EXISTS user"); // минус таблица если она есть
+        try ( Connection connection = Util.OpenConnection();
+              Statement statement = connection.createStatement()) {
 
-            connection.setAutoCommit(false); //  статус фиксации в false и завершается методом commit и там же сохраняются изменения
+            statement.executeUpdate("DROP TABLE IF EXISTS user");
+
+            connection.setAutoCommit(false);
             connection.commit();
-            System.out.println("Table was dropped!" + "\n");
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
     public void saveUser(String name, String lastName, byte age) {
-        // PreparedStatement принимает параметры
-        try (
-               // Connection connection = Util.OpenConnection();
-            PreparedStatement statement = connection.prepareStatement(
-                    "INSERT INTO user (name, lastName, age) VALUES (?, ?, ?);")) {
-            statement.setString(1, name); //  значения = ???
-            statement.setString(2, lastName);
-            statement.setInt(3, age);
-            //executeUpdate запрос
-            statement.executeUpdate();
+        try (   Connection connection = Util.OpenConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(
+                        "INSERT INTO user (name, lastName, age) VALUES (?, ?, ?);")) {
+            preparedStatement.setString(1, name);
+            preparedStatement.setString(2, lastName);
+            preparedStatement.setInt(3, age);
+            preparedStatement.executeUpdate();
 
-            connection.setAutoCommit(false); //  статус фиксации в false и завершается методом commit и там же сохраняются изменения
+            connection.setAutoCommit(false);
             connection.commit();
-            System.out.println();
-            System.out.println("User: " + name + ", " + lastName + " , " + age + " - was added into base"  + "\n");
+            System.out.println("User с именем - " + name + " добавлен в базу данных");
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
     public void removeUserById(long id) {
-        try (
-               // Connection connection = Util.OpenConnection();
-             PreparedStatement statement = connection.prepareStatement("DELETE FROM user WHERE Id = ?")) {
+        try ( Connection connection = Util.OpenConnection();
+              PreparedStatement statement = connection.prepareStatement("DELETE FROM user WHERE Id = ?")) {
 
-            statement.setLong(1, id); // уничтожаем кого-то
+            statement.setLong(1, id);
 
-            statement.executeUpdate(); //  запрос
+            statement.executeUpdate();
 
             connection.setAutoCommit(false);
             connection.commit();
-            System.out.println("User with id " + id + " was deleted!" + "\n");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -96,16 +80,15 @@ public class UserDaoJDBCImpl implements UserDao {
     public List<User> getAllUsers() {
         List<User> listUsers = new ArrayList<>();
 
-        try {
-            // Connection connection = Util.OpenConnection();
+        try ( Connection connection = Util.OpenConnection();
+              Statement statement = connection.createStatement()) {
+
             String sql = "SELECT * FROM user";
-            connection.setAutoCommit (false);
+            connection.setAutoCommit(false);
 
-            Statement statement = connection.createStatement();
+            ResultSet res = statement.executeQuery(sql);
 
-            ResultSet res = statement.executeQuery(sql); //ResultSet сохраняет данные из запроса)
-
-            connection.commit(); // непосредственно сам запрос
+            connection.commit();
             connection.setAutoCommit(true);
 
             while (res.next()) {
@@ -113,20 +96,18 @@ public class UserDaoJDBCImpl implements UserDao {
                         res.getString("name"), //
                         res.getString("lastName"),
                         (byte) res.getInt("age"));
-                user.setId(res.getLong("id")); //  idшки из хранилища
+                user.setId(res.getLong("id"));
                 listUsers.add(user);
-                System.out.println("Table has - " + user  + "\n");
             }
+            System.out.println(listUsers);
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return listUsers;
+        return  listUsers;
     }
-
-    public void cleanUsersTable() {
-        try (
-            //    Connection connection = Util.OpenConnection();
-             Statement statement = connection.createStatement()) {
+        public void cleanUsersTable() {
+        try ( Connection connection = Util.OpenConnection();
+              Statement statement = connection.createStatement()) {
 
             String sql = "DELETE FROM user";
 
@@ -134,10 +115,9 @@ public class UserDaoJDBCImpl implements UserDao {
 
             connection.setAutoCommit(false);
             connection.commit();
-            System.out.println("Table was cleaned!"  + "\n");
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-
 }
