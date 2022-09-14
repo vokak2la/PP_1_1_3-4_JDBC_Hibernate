@@ -3,7 +3,7 @@ package jm.task.core.jdbc.model;
 import javax.persistence.*;
 
 @Entity
- @Table(name="user")
+@Table(name="user")
 
 public class User {
     @Id
@@ -19,8 +19,6 @@ public class User {
 
     @Column
     private Byte age;
-
-
 
     public User() {}
 
@@ -62,13 +60,8 @@ public class User {
         this.age = age;
     }
 
-
-
     @Override
     public String toString() {
-        return "User { " + "id = " + id + ", name = " + '\'' + name + '\'' + ", lastName = " + '\'' + lastName + '\'' + ", age = " + age + '}';
+        return "User { " + "id = " + id + ", name = " + name + '\'' + ", lastName = " + lastName + '\'' + ", age = " + age + '}';
     }
 }
-
-
-
